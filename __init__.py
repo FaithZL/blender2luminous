@@ -22,10 +22,27 @@ bl_info = {
     "category" : "Render"
 }
 
-from . import auto_load
-from . import material_nodes
-from . import render_panel
-from . import render_exporter
+
+import sys
+import os
+
+from importlib import reload
+
+if __name__ == "__main__":
+    from blender2luminous import auto_load
+    from blender2luminous import material_nodes
+    from blender2luminous import render_panel
+    from blender2luminous import render_exporter
+
+    reload(auto_load)
+    reload(material_nodes)
+    reload(render_panel)
+    reload(render_exporter)
+else:
+    from . import auto_load
+    from . import material_nodes
+    from . import render_panel
+    from . import render_exporter
 
 auto_load.init()
 
@@ -34,3 +51,6 @@ def register():
 
 def unregister():
     auto_load.unregister()
+
+if __name__ == "__main__":
+    register()
