@@ -48,14 +48,20 @@ class PbrtRenderSettingsPanel(bpy.types.Panel):
         scene = context.scene
 
         # Create a simple row.
+
+
         layout.label(text="Output folder path")
         row = layout.row()
-        
         row.prop(scene, "exportpath")
+
+        row = layout.row()
+        row.prop(scene, "scene_name")
 
         layout.label(text=" Render output filename")
         row = layout.row()
         row.prop(scene,"outputfilename")
+        row = layout.row()
+        row.prop(scene, "frame_num")
 
         layout.label(text="Environment Map")
         row = layout.row()
@@ -65,12 +71,7 @@ class PbrtRenderSettingsPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, "environmentmapscale")
 
-        # layout.label(text="Frame settings:")
-        # row = layout.row()
-        # row.prop(scene, "batch_frame_start")
-        # row.prop(scene, "batch_frame_end")
-
-        layout.label(text="Resolution:")
+        layout.label(text="Film settings:")
         row = layout.row()
         row.prop(scene, "resolution_x")
         row.prop(scene, "resolution_y")
@@ -98,10 +99,8 @@ class PbrtRenderSettingsPanel(bpy.types.Panel):
 
         row.prop(scene,"integrators")
         row.prop(scene,"maxdepth")
-        
-        if scene.integrators == 'PT':
-            row = layout.row()
-            row.prop(scene,"rr_threshold")
+        row = layout.row()
+        row.prop(scene,"rr_threshold")
 
 
         layout.label(text="Sampler settings:")
@@ -113,13 +112,7 @@ class PbrtRenderSettingsPanel(bpy.types.Panel):
             row.prop(scene,"samplepixelcenter")
         if scene.sampler == 'PCGSampler':
             row.prop(scene,"spp")
-            
-
-        # layout.label(text="Depth of field:")
-        # row = layout.row()
-        # row.prop(scene,"dofLookAt")
-        # row = layout.row()
-        # row.prop(scene, "lensradius")
+        
 
         layout.label(text="Light strategy:")
         row = layout.row()
@@ -130,7 +123,15 @@ class PbrtRenderSettingsPanel(bpy.types.Panel):
         layout.operator("scene.export", icon='MESH_CUBE', text="Export scene")
 
 def register():
-    
+
+    bpy.types.Scene.scene_name = bpy.props.StringProperty(
+        name="",
+        description="Export folder",
+        default="luminous_scene",
+        maxlen=1024,
+        subtype='FILE_NAME'
+    )
+
     bpy.types.Scene.exportpath = bpy.props.StringProperty(
         name="",
         description="Export folder",
@@ -145,6 +146,7 @@ def register():
         maxlen=1024,
         subtype='FILE_PATH')
 
+
     bpy.types.Scene.outputfilename = bpy.props.StringProperty(
         name="",
         description="Image output file name",
@@ -152,8 +154,11 @@ def register():
         maxlen=1024,
         subtype='FILE_NAME')
 
-    bpy.types.Scene.spp = bpy.props.IntProperty(name = "Samples per pixel", description = "Set spp", 
+    bpy.types.Scene.frame_num = bpy.props.IntProperty(name = "frame num", description = "num of frame to save picture", 
                                                 default = 100, min = 1, max = 9999)
+
+    bpy.types.Scene.spp = bpy.props.IntProperty(name = "Samples per pixel", description = "Set spp", 
+                                                default = 1, min = 1, max = 9999)
     bpy.types.Scene.maxdepth = bpy.props.IntProperty(name = "Max depth", description = "Set max depth", 
                                                 default = 10, min = 1, max = 9999)
 
@@ -175,7 +180,8 @@ def register():
     bpy.types.Scene.batch_frame_end = bpy.props.IntProperty(name = "Frame end", description = "Frame end", 
                                                             default = 1, min = 1, max = 9999999)
 
-    bpy.types.Scene.rr_threshold = bpy.props.FloatProperty(name = "Threshold", description = "Threshold", default = 1.0, min = 0.001, max = 9999)
+    bpy.types.Scene.rr_threshold = bpy.props.FloatProperty(name = "rr Threshold", description = "rr Threshold", 
+                                                        default = 1.0, min = 0.001, max = 9999)
 
     filterTypes = [("box", "box", "", 1), ("gaussian", "gaussian", "", 2), ("sinc", "sinc", "", 4),("triangle", "triangle", "", 5)]
     bpy.types.Scene.filterType = bpy.props.EnumProperty(name = "filterType", items=filterTypes , default="triangle")
