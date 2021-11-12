@@ -235,11 +235,8 @@ def export_camera(scene, scene_json):
     }
 
 def export_integrator(scene, scene_json):
-    if scene.integrators != 'path':
-        print('[error] integrator is not path')
-        return
     scene_json['integrator'] = {
-		'type' : 'PT',
+		'type' : scene.integrators,
 		'param' : {
 			'max_depth' : scene.maxdepth,
 			'rr_threshold' : scene.rr_threshold
@@ -247,11 +244,8 @@ def export_integrator(scene, scene_json):
 	}
 
 def export_light_sampler(scene, scene_json):
-    if scene.lightsamplestrategy != 'uniform':
-        print('[error] light sampler is not uniform')
-        return
     scene_json['light_sampler'] = {
-		'type': 'UniformLightSampler'
+		'type': scene.light_sampler
 	}
 
 def export_sampler(scene, scene_json):
@@ -263,23 +257,17 @@ def export_sampler(scene, scene_json):
 	}
 
 def export_filter(scene, scene_json):
-    if scene.filterType != 'triangle':
-        print('[error] filter is not triangle')
-        return
     scene_json['filter'] = {
-		'type' : 'triangle',
+		'type' : scene.filterType,
 		'param' : {
 			'radius' : [scene.filter_x_width, scene.filter_y_width]
 		}
 	}
 
 def export_render_output(scene, scene_json):
-    if scene.outputfilename == '':
-        print('[error] render output file name is empty')
-        return
     scene_json['output'] = {
 		'fn': scene.outputfilename,
-		'frame_num' : 0
+		'frame_num' : scene.frame_num
     }
 
 def export_scene(scene_json, filepath):
@@ -606,7 +594,7 @@ def export_pbrt(filepath, scene):
 #     return ''
 
 # def export_LightSampleDistribution(pbrt_file, scene):
-#     pbrt_file.write(r'"string lightsamplestrategy" "%s"' % (bpy.data.scenes[0].lightsamplestrategy))
+#     pbrt_file.write(r'"string light_sampler" "%s"' % (bpy.data.scenes[0].light_sampler))
 #     pbrt_file.write("\n")
 #     return ''
 

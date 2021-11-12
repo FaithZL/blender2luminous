@@ -116,7 +116,7 @@ class PbrtRenderSettingsPanel(bpy.types.Panel):
 
         layout.label(text="Light strategy:")
         row = layout.row()
-        row.prop(scene,"lightsamplestrategy")
+        row.prop(scene,"light_sampler")
         
         layout.label(text="Export:")
         row = layout.row()
@@ -165,8 +165,10 @@ def register():
     integrators = [("PT", "PT", "", 1), ("wavefrontPT", "wavefrontPT", "", 2)]
     bpy.types.Scene.integrators = bpy.props.EnumProperty(name = "Name", items=integrators , default="PT")
 
-    lightsamplestrategy = [("uniform", "uniform", "", 1), ("power", "power", "", 2), ("bvh", "bvh", "", 3)]
-    bpy.types.Scene.lightsamplestrategy = bpy.props.EnumProperty(name = "lightsamplestrategy", items=lightsamplestrategy , default="uniform")
+    light_sampler = [("UniformLightSampler", "uniform", "", 1), 
+                    ("PowerLightSampler", "power", "", 2), 
+                    ("BVHLightSampler", "bvh", "", 3)]
+    bpy.types.Scene.light_sampler = bpy.props.EnumProperty(name = "light_sampler", items=light_sampler , default="UniformLightSampler")
 
     bpy.types.Scene.environmentmapscale = bpy.props.FloatProperty(name = "Env. map scale", description = "Env. map scale", default = 1, min = 0.001, max = 9999)
     
