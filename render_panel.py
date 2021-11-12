@@ -192,7 +192,7 @@ def register():
     bpy.types.Scene.filter_c = bpy.props.FloatProperty(name = "c", description = "c", default = 3.0, min = 0.0, max = 999)
     bpy.types.Scene.filter_alpha = bpy.props.FloatProperty(name = "alpha", description = "alpha", default = 2.0, min = 0.0, max = 999)
 
-    samplers = [("HaltonSampler", "HaltonSampler", "", 1), ("PCGSampler", "PCGSampler", "", 7)]
+    samplers = [("HaltonSampler", "HaltonSampler", "", 1), ("PCGSampler", "PCGSampler", "", 2)]
     bpy.types.Scene.sampler = bpy.props.EnumProperty(name = "Sampler", items=samplers , default="PCGSampler")
     bpy.types.Scene.samplepixelcenter = bpy.props.BoolProperty(name="sample pixel center", description="sample pixel center", default = False)
     bpy.types.Scene.dimension = bpy.props.IntProperty(name = "dimension", description = "dimension", default = 4, min = 0, max = 9999999)

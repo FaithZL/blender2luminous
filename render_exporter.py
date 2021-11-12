@@ -255,11 +255,8 @@ def export_light_sampler(scene, scene_json):
 	}
 
 def export_sampler(scene, scene_json):
-    if scene.sampler != 'PCGSampler':
-        print('[error] sampler is not PCGSampler')
-        return
     scene_json['sampler'] = {
-		'type' : 'PCGSampler',
+		'type' : scene.sampler,
 		'param' : {
 			'spp' : scene.spp
 		}
