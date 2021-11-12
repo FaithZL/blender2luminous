@@ -274,7 +274,7 @@ def export_scene(scene_json, filepath):
     with open(filepath, 'w') as outputfile:
         json.dump(scene_json, outputfile, indent=4)
 
-def export_pbrt(filepath, scene):
+def export_luminous(filepath, scene):
     scene_json = {}
 
     export_meshes(scene, scene_json)
@@ -1579,7 +1579,7 @@ def export_pbrt(filepath, scene):
 #     pbrt_file.write("\n\n")
 #     return ''
 # 
-# def export_pbrt(filepath, scene , frameNumber):
+# def export_luminous(filepath, scene , frameNumber):
     # out = os.path.join(filepath, "test" + frameNumber +".pbrt")
     # if not os.path.exists(filepath):
     #     print('Output directory did not exist, creating: ')

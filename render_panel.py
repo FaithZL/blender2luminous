@@ -15,13 +15,13 @@ class ExportPbrtScene(bpy.types.Operator):
         # for frameNumber in range(bpy.data.scenes['Scene'].batch_frame_start, bpy.data.scenes['Scene'].batch_frame_end +1):
         #     bpy.data.scenes['Scene'].frame_set(frameNumber)
         #     print("Exporting frame: %s" % (frameNumber))
-        #     render_exporter.export_pbrt(filepath_full, bpy.data.scenes['Scene'], '{0:05d}'.format(frameNumber))
-        render_exporter.export_pbrt(filepath_full, bpy.data.scenes['Scene'])
+        #     render_exporter.export_luminous(filepath_full, bpy.data.scenes['Scene'], '{0:05d}'.format(frameNumber))
+        render_exporter.export_luminous(filepath_full, bpy.data.scenes['Scene'])
         self.report({'INFO'}, "Export complete.")
         return {"FINISHED"}
 
-class PbrtRenderSettingsPanel(bpy.types.Panel):
-    """Creates a Pbrt settings panel in the render context of the properties editor"""
+class LuminousRenderSettingsPanel(bpy.types.Panel):
+    """Creates a Luminous settings panel in the render context of the properties editor"""
     bl_label = "Luminous Render settings"
     bl_idname = "SCENE_PT_layout"
     bl_space_type = 'PROPERTIES'
@@ -29,7 +29,6 @@ class PbrtRenderSettingsPanel(bpy.types.Panel):
     bl_context = "render"
     COMPAT_ENGINES = {'Luminous_Renderer'}
 
-    #Hide the pbrt render panel if PBRT render engine is not currently selected.
     @classmethod
     def poll(cls, context):
         engine = context.scene.render.engine
@@ -41,7 +40,7 @@ class PbrtRenderSettingsPanel(bpy.types.Panel):
     def draw(self, context):
         engine = context.scene.render.engine
         if engine != 'Luminous_Renderer':
-            bpy.utils.unregister_class(PbrtRenderSettingsPanel)
+            bpy.utils.unregister_class(LuminousRenderSettingsPanel)
 
         layout = self.layout
 
@@ -194,10 +193,12 @@ def register():
     bpy.types.Scene.filter_c = bpy.props.FloatProperty(name = "c", description = "c", default = 3.0, min = 0.0, max = 999)
     bpy.types.Scene.filter_alpha = bpy.props.FloatProperty(name = "alpha", description = "alpha", default = 2.0, min = 0.0, max = 999)
 
-    samplers = [("HaltonSampler", "HaltonSampler", "", 1), ("PCGSampler", "PCGSampler", "", 2)]
+    samplers = [("PCGSampler", "PCGSampler", "", 1), ("HaltonSampler", "HaltonSampler", "", 2)]
     bpy.types.Scene.sampler = bpy.props.EnumProperty(name = "Sampler", items=samplers , default="PCGSampler")
-    bpy.types.Scene.samplepixelcenter = bpy.props.BoolProperty(name="sample pixel center", description="sample pixel center", default = False)
-    bpy.types.Scene.dimension = bpy.props.IntProperty(name = "dimension", description = "dimension", default = 4, min = 0, max = 9999999)
+    bpy.types.Scene.samplepixelcenter = bpy.props.BoolProperty(name="sample pixel center", 
+                                                            description="sample pixel center", default = False)
+    bpy.types.Scene.dimension = bpy.props.IntProperty(name = "dimension", description = "dimension",
+                                                     default = 4, min = 0, max = 9999999)
     bpy.types.Scene.jitter = bpy.props.BoolProperty(name="jitter", description="jitter", default = True)
     bpy.types.Scene.xsamples = bpy.props.IntProperty(name = "xsamples", description = "xsamples", default = 4, min = 0, max = 9999999)
     bpy.types.Scene.ysamples = bpy.props.IntProperty(name = "ysamples", description = "ysamples", default = 4, min = 0, max = 9999999)
