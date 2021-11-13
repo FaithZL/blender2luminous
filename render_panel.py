@@ -46,9 +46,6 @@ class LuminousRenderSettingsPanel(bpy.types.Panel):
 
         scene = context.scene
 
-        # Create a simple row.
-
-
         layout.label(text="Output folder path")
         row = layout.row()
         row.prop(scene, "exportpath")
