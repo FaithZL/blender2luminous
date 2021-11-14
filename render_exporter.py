@@ -75,36 +75,23 @@ def getTextureInSlotName(textureSlotParam):
 
     return tail
 
-def exportTextureInSlotNew(textureSlotParam,isFloatTexture):
+def copy_image_to_dst_dir(textureSlotParam):
     srcfile = bpy.path.abspath(textureSlotParam)
     texturefilename = getTextureInSlotName(srcfile)
 
+    target_file = bpy.path.abspath(bpy.data.scenes[0].exportpath + 'textures/' + texturefilename)
+    dst_dir = os.path.dirname(target_file)
+    if not os.path.exists(dst_dir):
+         os.makedirs(dst_dir)
+    shutil.copyfile(srcfile, target_file)
+    return 'textures/' + texturefilename
 
-    dstdir = bpy.path.abspath(bpy.data.scenes[0].exportpath + 'textures/' + texturefilename)
-    print("os.path.dirname...")
-    print(os.path.dirname(srcfile))
-    print("\n")
-    print("srcfile: ")
-    print(srcfile)
-    print("\n")
-    print("dstdir: ")
-    print(dstdir)
-    print("\n")
-    print("File name is :")
-    print(texturefilename)
-    print("Copying texture from source directory to destination directory.")
-    # shutil.copyfile(srcfile, dstdir)
-    return ''
-
-def export_texture_from_input (pbrt_file, inputSlot, mat, isFloatTexture):
-    textureName = ""
-    links = inputSlot.links
-    print('Number of links: ')
-    print(len(links))
+def export_texture_from_input(inputSlot, mat):
+    ret = ""
     for x in inputSlot.links:
         textureName = x.from_node.image.name
-        exportTextureInSlotNew(x.from_node.image.filepath,isFloatTexture)
-    return textureName
+        ret = copy_image_to_dst_dir(x.from_node.image.filepath)
+    return ret
 
 def create_constant_tex(name, val):
     return {
@@ -116,12 +103,27 @@ def create_constant_tex(name, val):
         }
     }
 
+def create_image_tex(path):
+    return {
+        "type" : "ImageTexture",
+        "name" : path,
+        "param" : {
+            "fn" : path,
+            "color_space": "SRGB"
+        }
+    }
+
 def export_matte(scene_json, mat, mat_name):
     print("\nexport matte start !")
 
     Kd = [mat.Kd[0],mat.Kd[1],mat.Kd[2],mat.Kd[3]]
 
-    tex_data = create_constant_tex(mat_name + "_constant", Kd)
+    image_path = export_texture_from_input(mat.inputs[0],mat)
+
+    if image_path:
+        tex_data = create_image_tex(image_path)
+    else:
+        tex_data = create_constant_tex(mat_name + "_constant", Kd)
 
     add_textures(scene_json, tex_data)
 
