@@ -9,6 +9,13 @@ import shutil
 import struct
 import json
 
+from importlib import reload
+
+if __name__ == "__main__":
+    from blender2luminous import material_nodes
+    reload(material_nodes)
+else:
+    from . import material_nodes
 
 #render engine custom begin
 class LuminousRenderEngine(bpy.types.RenderEngine):
@@ -60,18 +67,90 @@ def matrixToList(matrix4x4):
         items.extend(row)
     return items
 
+def getTextureInSlotName(textureSlotParam):
+    srcfile = textureSlotParam
+    head, tail = os.path.split(srcfile)
+    print("File name is :")
+    print(tail)
+
+    return tail
+
+def exportTextureInSlotNew(textureSlotParam,isFloatTexture):
+    srcfile = bpy.path.abspath(textureSlotParam)
+    texturefilename = getTextureInSlotName(srcfile)
+
+
+    dstdir = bpy.path.abspath(bpy.data.scenes[0].exportpath + 'textures/' + texturefilename)
+    print("os.path.dirname...")
+    print(os.path.dirname(srcfile))
+    print("\n")
+    print("srcfile: ")
+    print(srcfile)
+    print("\n")
+    print("dstdir: ")
+    print(dstdir)
+    print("\n")
+    print("File name is :")
+    print(texturefilename)
+    print("Copying texture from source directory to destination directory.")
+    # shutil.copyfile(srcfile, dstdir)
+    return ''
+
+def export_texture_from_input (pbrt_file, inputSlot, mat, isFloatTexture):
+    textureName = ""
+    links = inputSlot.links
+    print('Number of links: ')
+    print(len(links))
+    for x in inputSlot.links:
+        textureName = x.from_node.image.name
+        exportTextureInSlotNew(x.from_node.image.filepath,isFloatTexture)
+    return textureName
+
+def create_constant_tex(name, val):
+    return {
+        "type" : "ConstantTexture",
+        "name" : name,
+        "param" : {
+            "val": val,
+			"color_space": "SRGB"
+        }
+    }
+
+def export_matte(scene_json, mat, mat_name):
+    print("\nexport matte start !")
+
+    Kd = [mat.Kd[0],mat.Kd[1],mat.Kd[2],mat.Kd[3]]
+
+    tex_data = create_constant_tex(mat_name + "_constant", Kd)
+
+    add_textures(scene_json, tex_data)
+
+    tab = {
+        "type": "MatteMaterial",
+        "name": mat_name,
+        "param": {
+            "diffuse": tex_data["name"]
+        }
+    }
+    add_material(scene_json, tab)
+
+    print("export matte end !")
+
 def export_material(scene, scene_json, object, slot_idx):
     mat = object.material_slots[slot_idx].material 
     if not mat or not mat.use_nodes:
         return
-    print('Mat name: ----------------', mat.name, mat.node_tree.nodes)
+    
+    def is_custom_node(node):
+        return isinstance(node, material_nodes.MyCustomTreeNode)
+
+    print('\nMat name: ', mat.name)
     for node in mat.node_tree.nodes:
-        print("node 0------------------------------",node.name)
-        # for input in node.inputs:
-        #     print("-------input.links", input.links)
-        #     for node_links in input.links:
-        #         currentMaterial =  node_links.from_node
-        #         print("Current mat id name:", currentMaterial.bl_idname)
+        if not is_custom_node(node):
+            continue
+        if node.bl_idname == 'CustomNodeTypeMatte':
+            export_matte(scene_json, node, mat.name)
+            
 
 def export_meshes(scene, scene_json):
     obj_directory_path = bpy.path.abspath(scene.exportpath + 'meshes')
@@ -310,7 +389,7 @@ def export_scene(scene_json, filepath):
 
 def find_index(lst, key):
     for i, elm in enumerate(lst):
-        if elm["key"] == key:
+        if elm["name"] == key:
             return i
     return -1
 
@@ -333,16 +412,17 @@ def create_matte(mat, scene_json):
     }
     return ret
 
-def add_textures(scene, scene_json, tex):
+def add_textures(scene_json, tex):
     index = find_index(scene_json["textures"], tex["name"])
     if index != -1:
-        return index    
+        return index
+    scene_json["textures"].append(tex)
 
-def add_material(scene, scene_json, mat):
-    index = find_index(scene_json["material"], mat["name"])
+def add_material(scene_json, mat):
+    index = find_index(scene_json["materials"], mat["name"])
     if index != -1:
         return index
-    
+    scene_json["materials"].append(mat)
 
 
 def export_luminous(filepath, scene):
