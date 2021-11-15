@@ -152,6 +152,7 @@ def export_material(scene, scene_json, object, slot_idx):
             continue
         if node.bl_idname == 'CustomNodeTypeMatte':
             export_matte(scene_json, node, mat.name)
+    return mat.name
             
 
 def write_ply(file, mesh, indices, normals, i):
@@ -211,6 +212,35 @@ def write_ply(file, mesh, indices, normals, i):
         out.write(struct.pack('<I', i+2))
     out.close()
 
+def export_mesh(scene, scene_json, object, mat_name, i):
+    print('exporting object:' , object.name)
+    bpy.context.view_layer.update()
+    object.data.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    eval_obj = object.evaluated_get(dg)
+    mesh = eval_obj.to_mesh()
+    if not mesh.loop_triangles and mesh.polygons:
+        mesh.calc_loop_triangles()
+
+    mesh.calc_normals_split()
+    indices = []
+    normals = []
+    for tri in mesh.loop_triangles:
+        if tri.material_index == i:
+            indices.extend(tri.vertices)
+            normals.extend(tri.split_normals)
+
+    objFolderPath = bpy.path.abspath(bpy.data.scenes[0].exportpath + 'meshes/')
+    if not os.path.exists(objFolderPath):
+        print('Meshes directory did not exist, creating: ')
+        print(objFolderPath)
+        os.makedirs(objFolderPath)
+
+    objFilePath = objFolderPath + object.name + f'.ply' 
+    objFilePathRel = 'meshes/' + object.name + f'.ply'
+
+    write_ply(objFilePath, mesh, indices, normals, i)
+
 def export_meshes(scene, scene_json):
     obj_directory_path = bpy.path.abspath(scene.exportpath + 'meshes')
     obj_filepath =  obj_directory_path + '/meshes.obj'
@@ -220,19 +250,16 @@ def export_meshes(scene, scene_json):
     def skip(object):
         return object is None or object.type == 'CAMERA' or object.type != 'MESH'
 
-    for object in scene.objects:
+    for i, object in enumerate(scene.objects):
         if skip(object):
             continue
-
-        print('exporting object:' , object.name)
-        bpy.context.view_layer.update()
-        object.data.update()
-        dg = bpy.context.evaluated_depsgraph_get()
-        eval_obj = object.evaluated_get(dg)
-        mesh = eval_obj.to_mesh()
-
+        mat_name = ""
         for i in range(len(object.material_slots)):
-            export_material(scene, scene_json, object, i)
+            mat_name = export_material(scene, scene_json, object, i)
+            break
+        
+        export_mesh(scene, scene_json, object, mat_name, i)
+
             
 
     return
