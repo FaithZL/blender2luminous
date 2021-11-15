@@ -241,6 +241,23 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
     write_ply(objFilePath, mesh, indices, normals, i)
 
+    data = {
+        "name" : object.name,
+        "type" : "model",
+        "param" : {
+            "fn": objFilePathRel,
+            "subdiv_level": 0,
+            'transform': {
+                'type': 'matrix4x4',
+                'param': {
+                    'matrix4x4':  matrixToList(object.matrix_world)
+                }
+            },
+        }
+    }
+    scene_json["shapes"].append(data)
+
+
 def export_meshes(scene, scene_json):
     obj_directory_path = bpy.path.abspath(scene.exportpath + 'meshes')
     obj_filepath =  obj_directory_path + '/meshes.obj'
@@ -512,10 +529,12 @@ def add_material(scene_json, mat):
 
 
 def export_luminous(filepath, scene):
-    scene_json = {}
-
-    scene_json["textures"] = []
-    scene_json["materials"] = []
+    scene_json = {
+        "textures":[],
+        "materials":[],
+        "shapes":[],
+        "lights":[],
+    }
 
     export_meshes(scene, scene_json)
     export_environmentmap(scene, scene_json)
