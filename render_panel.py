@@ -71,6 +71,8 @@ class LuminousRenderSettingsPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, "resolution_x")
         row.prop(scene, "resolution_y")
+        row = layout.row()
+        row.prop(scene, "fb_state")
        
         layout.label(text="Filter settings:")
         row = layout.row()
@@ -168,6 +170,12 @@ def register():
 
     bpy.types.Scene.environmentmapscale = bpy.props.FloatProperty(name = "Env. map scale", description = "Env. map scale", default = 1, min = 0.001, max = 9999)
     
+    framebuffer_state = [("render", "render", "", 1), 
+                    ("normal", "normal", "", 2), 
+                    ("albedo", "albedo", "", 3)]
+    bpy.types.Scene.fb_state = bpy.props.EnumProperty(name = "framebuffer_state", 
+                    items=framebuffer_state , default="render")
+
     bpy.types.Scene.resolution_x = bpy.props.IntProperty(name = "X", description = "Resolution x", default = 768, min = 1, max = 9999)
     bpy.types.Scene.resolution_y = bpy.props.IntProperty(name = "Y", description = "Resolution y", default = 768, min = 1, max = 9999)
 

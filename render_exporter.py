@@ -435,6 +435,12 @@ def export_camera(scene, scene_json):
     ratio = scene.render.resolution_y / scene.render.resolution_x
     angle_rad = camera_data_blender.angle_y
 
+    tab = {
+        "render" : 0,
+        "normal" : 1,
+        "albedo" : 2
+    }
+
     scene_json['camera'] = {
         'type': 'ThinLensCamera',
         'param': {
@@ -449,7 +455,7 @@ def export_camera(scene, scene_json):
             'film': {
                 'param': {
                     'resolution': [resolution_x, resolution_y],
-                    'fb_state' : 0
+                    'fb_state' : tab[scene.fb_state]
                 }
             }
         }
