@@ -431,10 +431,11 @@ def export_camera(scene, scene_json):
     print('render res: ', resolution_x , ' x ', resolution_y)
     ratio = scene.render.resolution_y / scene.render.resolution_x
     angle_rad = camera_data_blender.angle_y
+
     scene_json['camera'] = {
         'type': 'ThinLensCamera',
         'param': {
-            'fov_y': 2.0 * math.atan ( ratio * math.tan( angle_rad / 2.0 )) * 180.0 / math.pi,
+            'fov_y': angle_rad * 180.0 / math.pi,
             'velocity': 20,
             'transform': {
                 'type': 'matrix4x4',
@@ -444,7 +445,8 @@ def export_camera(scene, scene_json):
             },
             'film': {
                 'param': {
-                    'resolution': [resolution_x, resolution_y]
+                    'resolution': [resolution_x, resolution_y],
+                    'fb_state' : 0
                 }
             }
         }
