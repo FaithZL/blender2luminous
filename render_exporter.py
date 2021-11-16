@@ -7,6 +7,7 @@ import mathutils
 from mathutils import Vector
 import shutil
 import struct
+from io_mesh_ply import export_ply
 import json
 
 from importlib import reload
@@ -239,7 +240,9 @@ def export_mesh(scene, scene_json, object, mat_name, i):
     objFilePath = objFolderPath + object.name + f'.ply' 
     objFilePathRel = 'meshes/' + object.name + f'.ply'
 
-    write_ply(objFilePath, mesh, indices, normals, i)
+    # write_ply(objFilePath, mesh, indices, normals, i)
+
+    export_ply.save_mesh(objFilePath, mesh, True, True, True, True)
 
     data = {
         "name" : object.name,
