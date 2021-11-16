@@ -64,8 +64,8 @@ def get_filename(filepath):
 
 def matrixToList(matrix4x4):
     items = []
-    for row in matrix4x4.row:
-        items.extend(row)
+    for col in matrix4x4.col:
+        items.extend(col)
     return items
 
 def getTextureInSlotName(textureSlotParam):
