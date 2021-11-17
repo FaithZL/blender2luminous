@@ -262,11 +262,7 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
     rot_x = rotate_x(90)
 
-    rot_z = rotate_z(180)
-
-    s = scale([-1,-1,-1])
-    
-    mat = np.matmul(mat, rot_z)
+    s = scale([1,-1,1])
     
     mat = np.matmul(mat, rot_x)
 
