@@ -75,13 +75,37 @@ def scale(s):
 
 def rotate_x(theta):
     theta = radians(theta)
-    sinTheta = math.sin(theta);
-    cosTheta = math.cos(theta);
+    sinTheta = math.sin(theta)
+    cosTheta = math.cos(theta)
     mat = [
         [1, 0,        0,         0],
         [0, cosTheta, sinTheta, 0],
         [0, -sinTheta, cosTheta,  0],
         [0, 0,        0,         1]
+    ]
+    return np.array(mat)
+
+def rotate_y(theta):
+    theta = radians(theta)
+    sinTheta = math.sin(theta)
+    cosTheta = math.cos(theta)
+    mat = [
+        [cosTheta,  0, -sinTheta, 0],
+        [0,         1, 0,        0],
+        [sinTheta, 0, cosTheta, 0],
+        [0,         0, 0,        1]
+    ]
+    return np.array(mat)
+
+def rotate_z(theta):
+    theta = radians(theta)
+    sinTheta = math.sin(theta)
+    cosTheta = math.cos(theta)
+    mat = [
+        [cosTheta,  sinTheta, 0, 0],
+        [-sinTheta,  cosTheta, 0, 0],
+        [0,         0,        1, 0],
+        [0,         0,        0, 1]
     ]
     return np.array(mat)
 
@@ -236,12 +260,18 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
     mat = to_mat(object.matrix_world)
 
-    rot = rotate_x(90)
+    rot_x = rotate_x(90)
+
+    rot_z = rotate_z(180)
+
     s = scale([-1,-1,-1])
     
-    mat = np.matmul(mat, rot)
+    mat = np.matmul(mat, rot_z)
+    
+    mat = np.matmul(mat, rot_x)
 
     mat = np.matmul(mat, s)
+
 
     data = {
         "name" : object.name,
@@ -446,7 +476,6 @@ def export_camera(scene, scene_json):
     s = scale([-1,1,1])
 
     mat = np.matmul(mat, s)
-
     
     mat = np.matmul(mat, rot)
 
