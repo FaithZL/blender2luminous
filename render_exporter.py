@@ -109,18 +109,6 @@ def matrixToList_and_rotate(matrix4x4, angle):
 
     return mat.tolist() 
 
-def matrixToList(matrix4x4):
-    items = []
-    for col in matrix4x4.col:
-        items.extend(col)
-
-    mat = np.array(items).reshape(4,4)
-    s = scale([-1,1,1])
-    
-    # mat = np.matmul(s, mat)
-
-    return mat.tolist()
-
 def to_mat(matrix4x4):
     items = []
     for col in matrix4x4.col:
@@ -227,12 +215,12 @@ def export_mesh(scene, scene_json, object, mat_name, i):
         mesh.calc_loop_triangles()
 
     mesh.calc_normals_split()
-    indices = []
-    normals = []
-    for tri in mesh.loop_triangles:
-        if tri.material_index == i:
-            indices.extend(tri.vertices)
-            normals.extend(tri.split_normals)
+    # indices = []
+    # normals = []
+    # for tri in mesh.loop_triangles:
+    #     if tri.material_index == i:
+    #         indices.extend(tri.vertices)
+    #         normals.extend(tri.split_normals)
 
     objFolderPath = bpy.path.abspath(bpy.data.scenes[0].exportpath + 'meshes/')
     if not os.path.exists(objFolderPath):
@@ -243,9 +231,8 @@ def export_mesh(scene, scene_json, object, mat_name, i):
     objFilePath = objFolderPath + object.name + f'.ply' 
     objFilePathRel = 'meshes/' + object.name + f'.ply'
 
-    # write_ply(objFilePath, mesh, indices, normals, i)
 
-    export_ply.save_mesh(objFilePath, mesh, True, True, True, True)
+    export_ply.save_mesh(objFilePath, mesh, True, True, True, False)
 
     mat = to_mat(object.matrix_world)
 
@@ -456,7 +443,7 @@ def export_camera(scene, scene_json):
     mat = to_mat(camera_obj_blender.matrix_world)
 
     rot = rotate_x(-90)
-    s = scale([-1,1,-1])
+    s = scale([-1,1,1])
 
     mat = np.matmul(mat, s)
 
