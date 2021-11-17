@@ -468,12 +468,12 @@ def export_camera(scene, scene_json):
 
     mat = to_mat(camera_obj_blender.matrix_world)
 
-    rot = rotate_x(90)
-    s = scale([1,-1,1])
+    rot = rotate_x(-90)
+    s = scale([1,-1,-1])
     
     mat = np.matmul(mat, rot)
 
-    # mat = np.matmul(mat, s)
+    mat = np.matmul(mat, s)
 
 
     scene_json['camera'] = {
