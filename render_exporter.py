@@ -3,6 +3,7 @@ import bmesh
 import os
 import math
 from math import *
+import numpy as np
 import mathutils
 from mathutils import Vector
 import shutil
@@ -62,11 +63,70 @@ def get_filename(filepath):
     folderpath, filename = os.path.split(filepath)
     return filename
 
+def scale(s):
+    mat = [
+        [s[0], 0, 0, 0],
+        [0, s[1], 0, 0],
+        [0, 0, s[2], 0],
+        [0, 0, 0,     1]
+    ]
+    return np.array(mat)
+    
+
+def rotate_x(theta):
+    theta = radians(theta)
+    sinTheta = math.sin(theta);
+    cosTheta = math.cos(theta);
+    mat = [
+        [1, 0,        0,         0],
+        [0, cosTheta, sinTheta, 0],
+        [0, -sinTheta, cosTheta,  0],
+        [0, 0,        0,         1]
+    ]
+    return np.array(mat)
+
+def matrixToList_and_swaphanded(matrix4x4):
+    items = []
+    for col in matrix4x4.col:
+        items.extend(col)
+
+    mat = np.array(items).reshape(4,4)
+    s = scale([-1,1,1])
+    
+    mat = np.matmul(s, mat)
+
+    return mat.tolist()
+
+def matrixToList_and_rotate(matrix4x4, angle):
+    items = []
+    for col in matrix4x4.col:
+        items.extend(col)
+
+    mat = np.array(items).reshape(4,4)
+    rot = rotate_x(angle)
+    
+    mat = np.matmul(mat, rot)
+
+    return mat.tolist() 
+
 def matrixToList(matrix4x4):
     items = []
     for col in matrix4x4.col:
         items.extend(col)
-    return items
+
+    mat = np.array(items).reshape(4,4)
+    s = scale([-1,1,1])
+    
+    # mat = np.matmul(s, mat)
+
+    return mat.tolist()
+
+def to_mat(matrix4x4):
+    items = []
+    for col in matrix4x4.col:
+        items.extend(col)
+    mat = np.array(items).reshape(4,4)
+    return mat
 
 def getTextureInSlotName(textureSlotParam):
     srcfile = textureSlotParam
@@ -156,63 +216,6 @@ def export_material(scene, scene_json, object, slot_idx):
     return mat.name
             
 
-def write_ply(file, mesh, indices, normals, i):
-    
-    # Pack U,V
-    uvs = []
-    for uv_layer in mesh.uv_layers:
-        for tri in mesh.loop_triangles:
-            if tri.material_index == i:
-                for loop_index in tri.loops:
-                    uvs.append((
-                        uv_layer.data[loop_index].uv[0],
-                        uv_layer.data[loop_index].uv[1]
-                    ))
-
-    out = open(file, 'w')
-    out.write("ply\n")
-    out.write("format binary_little_endian 1.0\n")
-    out.write(f"element vertex {len(indices)}\n")
-    out.write("property float x\n")
-    out.write("property float y\n")
-    out.write("property float z\n")
-    out.write("property float nx\n")
-    out.write("property float ny\n")
-    out.write("property float nz\n")
-    # TODO: Check UV have same size than indices, normals
-    if len(uvs) != 0:
-        out.write("property float u\n")
-        out.write("property float v\n")
-    out.write(f"element face {len(indices) // 3}\n")
-    # TODO: Check size and switch to proper precision
-    out.write("property list uint int vertex_indices\n")
-    out.write("end_header\n")
-
-    # Now switch to binary writing
-    out.close()
-    out = open(file, "ab")
-    # Position & Normals & UVs
-    for (id,(id_vertex,n)) in enumerate(zip(indices, normals)):
-        out.write(struct.pack('<f', mesh.vertices[id_vertex].co.x))
-        out.write(struct.pack('<f', mesh.vertices[id_vertex].co.y))
-        out.write(struct.pack('<f', mesh.vertices[id_vertex].co.z))
-        
-        out.write(struct.pack('<f', n[0]))
-        out.write(struct.pack('<f', n[1]))
-        out.write(struct.pack('<f', n[2]))
-
-        if len(uvs) != 0:
-            out.write(struct.pack('<f', uvs[id][0]))
-            out.write(struct.pack('<f', uvs[id][1]))
-
-    # Indices
-    for i in range(0, len(indices), 3):
-        out.write(struct.pack('<I', 3))
-        out.write(struct.pack('<I', i))
-        out.write(struct.pack('<I', i+1))
-        out.write(struct.pack('<I', i+2))
-    out.close()
-
 def export_mesh(scene, scene_json, object, mat_name, i):
     print('exporting object:' , object.name)
     bpy.context.view_layer.update()
@@ -244,6 +247,12 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
     export_ply.save_mesh(objFilePath, mesh, True, True, True, True)
 
+    mat = to_mat(object.matrix_world)
+
+    rot = rotate_x(90)
+    
+    mat = np.matmul(mat, rot)
+
     data = {
         "name" : object.name,
         "type" : "model",
@@ -253,7 +262,7 @@ def export_mesh(scene, scene_json, object, mat_name, i):
             'transform': {
                 'type': 'matrix4x4',
                 'param': {
-                    'matrix4x4':  matrixToList(object.matrix_world)
+                    'matrix4x4':  mat.tolist()
                 }
             },
         }
@@ -363,7 +372,7 @@ def export_point_lights(scene, scene_json):
                 'transform': {
                     'type': 'matrix4x4',
                     'param': {
-                        'matrix4x4':  matrixToList(light_obj.matrix_world)
+                        'matrix4x4':  matrixToList_and_swaphanded(light_obj.matrix_world)
                     }
                 },
                 'color': list(light_data.color)
@@ -403,7 +412,7 @@ def export_area_lights(scene, scene_json):
                 'transform': {
                     'type': 'matrix4x4',
                     'param': {
-                        'matrix4x4':  matrixToList(light_obj.matrix_world)
+                        'matrix4x4':  matrixToList_and_swaphanded(light_obj.matrix_world)
                     }
                 },
                 'material': ''
@@ -441,6 +450,12 @@ def export_camera(scene, scene_json):
         "albedo" : 2
     }
 
+    mat = to_mat(camera_obj_blender.matrix_world)
+
+    rot = rotate_x(-90)
+    
+    mat = np.matmul(mat, rot)
+
     scene_json['camera'] = {
         'type': 'ThinLensCamera',
         'param': {
@@ -449,7 +464,7 @@ def export_camera(scene, scene_json):
             'transform': {
                 'type': 'matrix4x4',
                 'param': {
-                    'matrix4x4': matrixToList(camera_obj_blender.matrix_world)
+                    'matrix4x4': mat.tolist()
                 }
             },
             'film': {
