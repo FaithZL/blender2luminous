@@ -272,6 +272,7 @@ def export_mesh(scene, scene_json, object, mat_name, i):
     data = {
         "name" : object.name,
         "type" : "model",
+        "material" : mat_name,
         "param" : {
             "fn": objFilePathRel,
             "subdiv_level": 0,
