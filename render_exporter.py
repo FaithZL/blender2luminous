@@ -72,6 +72,29 @@ def scale(s):
     ]
     return np.array(mat)
     
+def to_lh_cs():
+    mat = [
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [1, 0, 0, 0],
+        [0, 0, 0, 1]
+    ]
+    return np.array(mat)
+
+def convert_view(v):
+    h_t = np.array([
+        [0,0,1,0],
+        [1,0,0,0],
+        [0,1,0,0],
+        [0,0,0,1]
+    ])
+    w = np.array([
+        [1,0,0,0],
+        [0,1,0,0],
+        [0,0,1,0],
+        [0,0,0,1]
+    ])
+    return np.matmul(w, np.matmul(v, h_t))
 
 def rotate_x(theta):
     theta = radians(theta)
@@ -260,13 +283,17 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
     mat = to_mat(object.matrix_world)
 
+    # mat = np.matmul(to_lh_cs(), mat)
+
     rot_x = rotate_x(90)
 
     s = scale([1,-1,1])
     
-    mat = np.matmul(mat, rot_x)
+    # mat = 
 
-    mat = np.matmul(mat, s)
+    print(np.matmul(s, rot_x))
+
+    # mat = np.matmul(np.matmul(s, rot_x), mat)
 
 
     data = {
@@ -469,12 +496,14 @@ def export_camera(scene, scene_json):
 
     mat = to_mat(camera_obj_blender.matrix_world)
 
-    rot = rotate_x(-90)
-    s = scale([1,-1,-1])
-    
-    mat = np.matmul(mat, rot)
+    # mat = convert_view(mat)
 
-    mat = np.matmul(mat, s)
+    rot = rotate_z(180)
+    # s = scale([1,-1,-1])
+    
+    # mat = np.matmul(rot, mat)
+
+    # mat = np.matmul(mat, s)
 
 
     scene_json['camera'] = {
