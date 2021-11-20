@@ -475,6 +475,11 @@ def export_area_lights(scene, scene_json):
     else:
         scene_json['shapes'] = lights
 
+def yaw_pitch(m):
+    pitch = math.degrees(math.atan2(m[1][2], (m[1][1])))
+    yaw = math.degrees(math.atan2(m[2][0], m[0][0]))
+    return yaw, pitch
+
 def export_camera(scene, scene_json):
     camera = {}
     camera_obj_blender = None
@@ -501,15 +506,10 @@ def export_camera(scene, scene_json):
     }
 
     mat = to_mat(camera_obj_blender.matrix_world)
-    # rot = rotate_x(90)
-    # mat = np.matmul(mat, rot)
     
-    r = rotate_x(90)
-    s = scale([1,1,-1])
+    pos = mat[3][0:3]
+    yaw, pitch = yaw_pitch(mat)
 
-    # t = np.matmul(s, r)
-
-    mat = np.matmul(mat, s)
 
     scene_json['camera'] = {
         'type': 'ThinLensCamera',
@@ -517,9 +517,15 @@ def export_camera(scene, scene_json):
             'fov_y': angle_rad * 180.0 / math.pi,
             'velocity': 20,
             'transform': {
-                'type': 'matrix4x4',
-                'param': {
-                    'matrix4x4': mat.tolist()
+                # 'type': 'matrix4x4',
+                # 'param': {
+                #     'matrix4x4': mat.tolist()
+                # }
+                "type" : "yaw_pitch",
+                "param" : {
+                    "yaw" : yaw,
+                    "pitch" : pitch - 90,
+                    "position" : [pos[0], pos[2], pos[1]]
                 }
             },
             'film': {
