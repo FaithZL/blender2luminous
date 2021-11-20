@@ -264,12 +264,6 @@ def export_mesh(scene, scene_json, object, mat_name, i):
         mesh.calc_loop_triangles()
 
     mesh.calc_normals_split()
-    # indices = []
-    # normals = []
-    # for tri in mesh.loop_triangles:
-    #     if tri.material_index == i:
-    #         indices.extend(tri.vertices)
-    #         normals.extend(tri.split_normals)
 
     objFolderPath = bpy.path.abspath(bpy.data.scenes[0].exportpath + 'meshes/')
     if not os.path.exists(objFolderPath):
@@ -411,18 +405,29 @@ def export_point_lights(scene, scene_json):
     # 不能用bpy.data.objects[bpy.data.lights[0].name]这种形式来获取对象，name不是key，有可能两者不一致，如之前碰到的name=面光，key=g面光
     # for light_data in bpy.data.lights:
     #     light_obj = bpy.data.objects[light_data.name]
+    
     for obj in scene.objects:
         if obj.type != 'LIGHT' or obj.data.type != 'POINT':
             continue
         light_obj = obj
         light_data = obj.data
+        
+        mat = to_mat(light_obj.matrix_world)
+        
+        r = rotate_x(90)
+        s = scale([1,1,-1])
+
+        t = np.matmul(s, r)
+
+        mat = np.matmul(mat, t)
+        
         light = {
             'type': 'PointLight',
             'param': {
                 'transform': {
                     'type': 'matrix4x4',
                     'param': {
-                        'matrix4x4':  matrixToList_and_swaphanded(light_obj.matrix_world)
+                        'matrix4x4':  mat.tolist()
                     }
                 },
                 'color': list(light_data.color)
