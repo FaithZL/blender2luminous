@@ -250,6 +250,8 @@ def export_material(scene, scene_json, object, slot_idx):
             export_matte(scene_json, node, mat.name)
     return mat.name
             
+def model_transform(mat):
+    mat = []
 
 def export_mesh(scene, scene_json, object, mat_name, i):
     print('exporting object:' , object.name)
@@ -283,15 +285,19 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
     mat = to_mat(object.matrix_world)
 
-    # mat = np.matmul(to_lh_cs(), mat)
+    r = rotate_x(90)
+    s = scale([1,1,-1])
 
-    rot_x = rotate_x(90)
+    t = np.matmul(s, r)
 
-    s = scale([1,-1,1])
+    mat = np.matmul(mat, t)
+
+    # rot_x = rotate_x(90)
+
+    # s = scale([1,-1,1])
     
-    # mat = 
 
-    print(np.matmul(s, rot_x))
+    # print(np.matmul(s, rot_x))
 
     # mat = np.matmul(np.matmul(s, rot_x), mat)
 
@@ -495,16 +501,15 @@ def export_camera(scene, scene_json):
     }
 
     mat = to_mat(camera_obj_blender.matrix_world)
-
-    # mat = convert_view(mat)
-
-    rot = rotate_z(180)
-    # s = scale([1,-1,-1])
+    # rot = rotate_x(90)
+    # mat = np.matmul(mat, rot)
     
-    # mat = np.matmul(rot, mat)
+    r = rotate_x(90)
+    s = scale([1,1,-1])
 
-    # mat = np.matmul(mat, s)
+    # t = np.matmul(s, r)
 
+    mat = np.matmul(mat, s)
 
     scene_json['camera'] = {
         'type': 'ThinLensCamera',
