@@ -508,9 +508,12 @@ def export_camera(scene, scene_json):
     mat = to_mat(camera_obj_blender.matrix_world)
     
     pos = mat[3][0:3]
-    yaw, pitch = yaw_pitch(mat)
-
-
+    
+    euler = camera_obj_blender.rotation_euler
+    
+    pitch = math.degrees(euler.x) - 90
+    yaw = math.degrees(euler.z)
+    
     scene_json['camera'] = {
         'type': 'ThinLensCamera',
         'param': {
@@ -524,7 +527,7 @@ def export_camera(scene, scene_json):
                 "type" : "yaw_pitch",
                 "param" : {
                     "yaw" : yaw,
-                    "pitch" : pitch - 90,
+                    "pitch" : pitch,
                     "position" : [pos[0], pos[2], pos[1]]
                 }
             },
