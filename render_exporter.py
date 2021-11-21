@@ -286,16 +286,6 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
     mat = np.matmul(mat, t)
 
-    # rot_x = rotate_x(90)
-
-    # s = scale([1,-1,1])
-    
-
-    # print(np.matmul(s, rot_x))
-
-    # mat = np.matmul(np.matmul(s, rot_x), mat)
-
-
     data = {
         "name" : object.name,
         "type" : "model",
@@ -455,6 +445,19 @@ def export_area_lights(scene, scene_json):
         else:
             width = light_data.size
             height = light_data.size_y
+            
+        mat = to_mat(light_obj.matrix_world)
+        
+        r = rotate_x(90)
+        s = scale([1,1,-1])
+
+        t = np.matmul(s, r)
+        
+        # r2 = rotate_x(-90)
+        
+        # t = np.matmul(r2, t)
+
+        mat = np.matmul(mat, t)
 
         light = {
             'name': 'light_' + light_obj.name,
@@ -467,7 +470,7 @@ def export_area_lights(scene, scene_json):
                 'transform': {
                     'type': 'matrix4x4',
                     'param': {
-                        'matrix4x4':  matrixToList_and_swaphanded(light_obj.matrix_world)
+                        'matrix4x4': mat.tolist()
                     }
                 },
                 'material': ''
