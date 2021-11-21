@@ -452,10 +452,6 @@ def export_area_lights(scene, scene_json):
         s = scale([1,1,-1])
 
         t = np.matmul(s, r)
-        
-        # r2 = rotate_x(-90)
-        
-        # t = np.matmul(r2, t)
 
         mat = np.matmul(mat, t)
 
