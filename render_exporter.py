@@ -454,6 +454,7 @@ def export_area_lights(scene, scene_json):
         t = np.matmul(s, r)
 
         mat = np.matmul(mat, t)
+        
 
         light = {
             'name': 'light_' + light_obj.name,
@@ -462,7 +463,7 @@ def export_area_lights(scene, scene_json):
                 'width': width,
                 'height': height,
                 'emission': list(light_data.color),
-                'scale': 1,
+                'scale': light_data.energy,
                 'transform': {
                     'type': 'matrix4x4',
                     'param': {
