@@ -132,6 +132,12 @@ def rotate_z(theta):
     ]
     return np.array(mat)
 
+def to_luminous():
+    r = rotate_x(90)
+    s = scale([1,1,-1])
+    t = np.matmul(s, r)
+    return t
+
 def matrixToList_and_swaphanded(matrix4x4):
     items = []
     for col in matrix4x4.col:
@@ -279,12 +285,7 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
     mat = to_mat(object.matrix_world)
 
-    r = rotate_x(90)
-    s = scale([1,1,-1])
-
-    t = np.matmul(s, r)
-
-    mat = np.matmul(mat, t)
+    mat = np.matmul(mat, to_luminous())
 
     data = {
         "name" : object.name,
@@ -327,12 +328,12 @@ def export_meshes(scene, scene_json):
 
     return
 
-    bpy.ops.export_scene.obj(filepath=obj_filepath, use_mesh_modifiers=True, use_normals=True, use_uvs=True, use_materials=True, path_mode='COPY', use_vertex_groups=True)
+    bpy.ops.export_scene.gltf(filepath=obj_filepath)
     scene_json['shapes'] = [{
         'name': 'mesh',
         'type': 'model',
         'param': {
-            'fn': 'meshes/meshes.obj',
+            'fn': 'meshes/meshes.gltf',
             'smooth': False,
             'swap_handed': True,
             'subdiv_level': 0,
@@ -447,13 +448,9 @@ def export_area_lights(scene, scene_json):
             height = light_data.size_y
             
         mat = to_mat(light_obj.matrix_world)
-        
-        r = rotate_x(90)
-        s = scale([1,1,-1])
+    
 
-        t = np.matmul(s, r)
-
-        mat = np.matmul(mat, t)
+        mat = np.matmul(mat, to_luminous())
         
 
         light = {
