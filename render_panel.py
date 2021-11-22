@@ -53,11 +53,13 @@ class LuminousRenderSettingsPanel(bpy.types.Panel):
         row = layout.row()
         row.prop(scene, "scene_name")
 
-        layout.label(text=" Render output filename")
+        layout.label(text=" Render output")
         row = layout.row()
         row.prop(scene,"outputfilename")
         row = layout.row()
         row.prop(scene, "frame_num")
+        row = layout.row()
+        row.prop(scene, "file_format")
 
         layout.label(text="Environment Map")
         row = layout.row()
@@ -162,6 +164,10 @@ def register():
 
     integrators = [("PT", "PT", "", 1), ("wavefrontPT", "wavefrontPT", "", 2)]
     bpy.types.Scene.integrators = bpy.props.EnumProperty(name = "Name", items=integrators , default="PT")
+    
+    file_formats = [(".ply", ".ply", "", 1), (".gltf", ".gltf", "", 2)]
+    bpy.types.Scene.file_format = bpy.props.EnumProperty(name = "Name", items=file_formats , default=".gltf")
+    
 
     light_sampler = [("UniformLightSampler", "uniform", "", 1), 
                     ("PowerLightSampler", "power", "", 2), 

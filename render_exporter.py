@@ -307,28 +307,32 @@ def export_mesh(scene, scene_json, object, mat_name, i):
 
 def export_meshes(scene, scene_json):
     obj_directory_path = bpy.path.abspath(scene.exportpath + 'meshes')
-    obj_filepath =  obj_directory_path + '/meshes.obj'
+    obj_filepath =  obj_directory_path + '/meshes.gltf'
     # print(f'[info] export mesh to {obj_filepath}')
     create_directory_if_needed(obj_directory_path)
 
-    def skip(object):
-        return object is None or object.type == 'CAMERA' or object.type != 'MESH'
+    if scene.file_format == ".ply":
 
-    for i, object in enumerate(scene.objects):
-        if skip(object):
-            continue
-        mat_name = ""
-        for i in range(len(object.material_slots)):
-            mat_name = export_material(scene, scene_json, object, i)
-            break
-        
-        export_mesh(scene, scene_json, object, mat_name, i)
+        def skip(object):
+            return object is None or object.type == 'CAMERA' or object.type != 'MESH'
 
+        for i, object in enumerate(scene.objects):
+            if skip(object):
+                continue
+            mat_name = ""
+            for i in range(len(object.material_slots)):
+                mat_name = export_material(scene, scene_json, object, i)
+                break
             
+            export_mesh(scene, scene_json, object, mat_name, i)
 
-    return
+        return
+    
+    r = rotate_x(0)
+    s = scale([1,1,1])
+    t = np.matmul(s, r)
 
-    bpy.ops.export_scene.gltf(filepath=obj_filepath)
+    bpy.ops.export_scene.gltf(filepath=obj_filepath,export_format="GLTF_SEPARATE" )
     scene_json['shapes'] = [{
         'name': 'mesh',
         'type': 'model',
@@ -338,11 +342,9 @@ def export_meshes(scene, scene_json):
             'swap_handed': True,
             'subdiv_level': 0,
             'transform': {
-                'type': 'trs',
+                'type': 'matrix4x4',
                 'param': {
-                    't': [0, 0, 0],
-                    'r': [0, 0, 0, 0],
-                    's': [1, 1, 1]
+                    'matrix4x4':  t.tolist()
                 }
             }
         }
