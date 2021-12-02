@@ -195,7 +195,11 @@ def register():
     bpy.types.Scene.rr_threshold = bpy.props.FloatProperty(name = "rr Threshold", description = "rr Threshold", 
                                                         default = 1.0, min = 0.001, max = 9999)
 
-    filterTypes = [("box", "box", "", 1), ("gaussian", "gaussian", "", 2), ("sinc", "sinc", "", 4),("triangle", "triangle", "", 5)]
+    filterTypes = [("BoxFilter", "BoxFilter", "", 1), 
+                   ("GaussianFilter", "GaussianFilter", "", 2),
+                   ("MitchellFilter", "MitchellFilter", "", 2),
+                   ("LanczosSincFilter", "LanczosSincFilter", "", 4),
+                   ("TriangleFilter", "TriangleFilter", "", 5)]
     bpy.types.Scene.filterType = bpy.props.EnumProperty(name = "filterType", items=filterTypes , default="triangle")
     bpy.types.Scene.filter_x_width = bpy.props.FloatProperty(name = "x", description = "x", default = 0.5, min = 0.0, max = 999)
     bpy.types.Scene.filter_y_width = bpy.props.FloatProperty(name = "y", description = "y", default = 0.5, min = 0.001, max = 999)
